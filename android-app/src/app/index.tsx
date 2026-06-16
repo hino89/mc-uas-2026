@@ -71,8 +71,41 @@ export default function App() {
     };
   }, []);
 
-  const isNoisy = parseFloat(soundData) > 70;
-  const isTooDim = parseFloat(lightData) < 150;
+  const luxValue = parseFloat(lightData);
+  let lightContext = "OPTIMAL ILLUMINATION";
+  let lightStyle = styles.sageBackground;
+
+  if (luxValue < 100) {
+    lightContext = "CRITICAL: SEVERE EYE STRAIN";
+    lightStyle = styles.alertBackground;
+  } else if (luxValue < 150) {
+    lightContext = "DEFICIENT: COMPROMISES FOCUS";
+    lightStyle = styles.amberBackground;
+  } else if (luxValue > 500) {
+    lightContext = "EXCESSIVE: GLARE FATIGUE";
+    lightStyle = styles.alertBackground;
+  } else if (luxValue > 400) {
+    lightContext = "BRIGHT: POTENTIAL GLARE";
+    lightStyle = styles.amberBackground;
+  }
+
+  const dbValue = parseFloat(soundData);
+  let soundContext = "NOMINAL AMBIENT";
+  let soundStyle = styles.sageBackground;
+
+  if (dbValue < 20) {
+    soundContext = "CRITICAL: ABNORMALLY SILENT";
+    soundStyle = styles.alertBackground;
+  } else if (dbValue < 30) {
+    soundContext = "QUIET: LACKS AMBIENCE";
+    soundStyle = styles.amberBackground;
+  } else if (dbValue > 70) {
+    soundContext = "NOISY: COGNITIVE STRAIN";
+    soundStyle = styles.alertBackground;
+  } else if (dbValue > 60) {
+    soundContext = "ELEVATED: DISTRACTING";
+    soundStyle = styles.amberBackground;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -95,7 +128,7 @@ export default function App() {
         <View style={styles.cardsRow}>
           
           {/* COLUMN 1: LIGHT SENSOR */}
-          <View style={[styles.sensorCard, styles.sageBackground]}>
+          <View style={[styles.sensorCard, lightStyle]}>
             <View style={styles.sensorHeader}>
               <Text style={styles.sensorTitle}>LUX</Text>
             </View>
@@ -103,12 +136,12 @@ export default function App() {
               <Text style={styles.dataValue}>{lightData}</Text>
             </View>
             <Text style={styles.sensorStatus}>
-              {isTooDim ? 'DEFICIENT' : 'OPTIMAL'}
+              {lightContext}
             </Text>
           </View>
 
           {/* COLUMN 2: SOUND SENSOR */}
-          <View style={[styles.sensorCard, isNoisy ? styles.alertBackground : styles.sageBackground]}>
+          <View style={[styles.sensorCard, soundStyle]}>
             <View style={styles.sensorHeader}>
               <Text style={styles.sensorTitle}>dB</Text>
             </View>
@@ -116,7 +149,7 @@ export default function App() {
               <Text style={styles.dataValue}>{soundData}</Text>
             </View>
             <Text style={styles.sensorStatus}>
-              {isNoisy ? 'EXCESSIVE' : 'NOMINAL'}
+              {soundContext}
             </Text>
           </View>
           
@@ -190,6 +223,9 @@ const styles = StyleSheet.create({
   },
   alertBackground: {
     backgroundColor: '#802520', 
+  },
+  amberBackground: {
+    backgroundColor: '#BA8530', 
   },
   sensorHeader: {
     flexDirection: 'row',
