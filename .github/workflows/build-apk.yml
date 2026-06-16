@@ -1,0 +1,40 @@
+name: Build Android APK Fast
+
+on:
+  workflow_dispatch: # Memungkinkan tombol manual "Run workflow" di GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: ☕ Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📦 Install npm dependencies
+        working-directory: ./android-app
+        run: npm install
+
+      - name: 🏗️ Generate Android folder (Prebuild)
+        working-directory: ./android-app
+        run: npx expo prebuild --platform android --clean
+
+      - name: 🔨 Build APK (Gradle)
+        working-directory: ./android-app/android
+        run: ./gradlew assembleRelease
+
+      - name: 📤 Upload APK File
+        uses: actions/upload-artifact@v4
+        with:
+          name: Class-LUXDB-APK
+          path: android-app/android/app/build/outputs/apk/release/app-release.apk
